@@ -15,12 +15,7 @@ Funkcje:
 - Bootstrap (CDN)
 
 ## Uruchomienie
-```bash
-python -m venv venv
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
+docker build -t flask-todo .
+docker run -p 5000:5000 -v "${PWD}\data:/app/data" flask-todo
 
-pip install -r requirements.txt
-python app.py
+// testuję Dockera
