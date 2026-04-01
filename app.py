@@ -22,6 +22,7 @@ class Task:
     title: str
     done: bool
     created_at: str  # ISO datetime string
+    priority: int
 
 
 def ensure_storage() -> None:
@@ -41,10 +42,11 @@ def load_tasks() -> List[Task]:
         # defensywnie na wypadek braków w pliku
         tasks.append(
             Task(
-                id=str(item.get("id", "")),
-                title=str(item.get("title", "")),
-                done=bool(item.get("done", False)),
-                created_at=str(item.get("created_at", "")),
+            id=str(item.get("id", "")),
+            title=str(item.get("title", "")),
+            done=bool(item.get("done", False)),
+            created_at=str(item.get("created_at", "")),
+            priority=int(item.get("priority", 2)),
             )
         )
     return tasks
@@ -76,7 +78,7 @@ def index():
         tasks_view = tasks
 
     # sort: newest first
-    tasks_view.sort(key=lambda t: t.created_at, reverse=True)
+    tasks_view.sort(key=lambda t: (t.priority, t.created_at), reverse=True)
 
     counts = {
         "all": len(tasks),
@@ -93,6 +95,15 @@ def add_task():
     if len(title) < 2:
         flash("Tytuł jest za krótki (min. 2 znaki).", "danger")
         return redirect(url_for("index", view=request.args.get("view", "all")))
+        
+    priority_raw = request.form.get("priority", "2")
+    try:
+        priority = int(priority_raw)
+    except ValueError:
+        priority = 2
+
+    if priority not in (1, 2, 3):
+        priority = 2
 
     tasks = load_tasks()
     new_task = Task(
@@ -100,6 +111,7 @@ def add_task():
         title=title,
         done=False,
         created_at=datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        priority=priority,
     )
     tasks.append(new_task)
     save_tasks(tasks)

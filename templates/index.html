@@ -46,10 +46,19 @@
     <div class="card shadow-sm mb-3">
       <div class="card-body">
         <form method="post" action="/add?view={{ view }}" class="row g-2 align-items-center">
-          <div class="col-12 col-md-9">
+          <div class="col-12 col-md-6">
             <input class="form-control" name="title" placeholder="Wpisz nowe zadanie..." minlength="2" required />
           </div>
-          <div class="col-12 col-md-3 d-grid">
+
+          <div class="col-6 col-md-3">
+            <select class="form-select" name="priority">
+              <option value="3">Wysoki (3)</option>
+              <option value="2" selected>Średni (2)</option>
+              <option value="1">Niski (1)</option>
+            </select>
+          </div>
+
+          <div class="col-6 col-md-3 d-grid">
             <button class="btn btn-primary" type="submit">Dodaj</button>
           </div>
         </form>
@@ -74,8 +83,16 @@
             {% for t in tasks %}
               <div class="list-group-item d-flex align-items-center justify-content-between">
                 <div class="d-flex flex-column">
-                  <div class="{{ 'task-done' if t.done else '' }}">
-                    {{ t.title }}
+                  <div class="d-flex align-items-center gap-2 {{ 'task-done' if t.done else '' }}">
+                    <span class="badge 
+                      {% if t.priority == 3 %}bg-danger
+                      {% elif t.priority == 2 %}bg-warning
+                      {% else %}bg-secondary
+                      {% endif %}
+                    ">
+                      P{{ t.priority }}
+                    </span>
+                    <span>{{ t.title }}</span>
                   </div>
                   <div class="text-muted small small-mono">ID: {{ t.id }} • {{ t.created_at }}</div>
                 </div>
