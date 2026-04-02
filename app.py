@@ -23,6 +23,7 @@ class Task:
     done: bool
     created_at: str  # ISO datetime string
     priority: int
+    estimated_minutes: int
 
 
 def ensure_storage() -> None:
@@ -37,6 +38,7 @@ def load_tasks() -> List[Task]:
     ensure_storage()
     with open(TASKS_PATH, "r", encoding="utf-8") as f:
         raw = json.load(f)
+
     tasks: List[Task] = []
     for item in raw:
         # defensywnie na wypadek braków w pliku
@@ -47,6 +49,7 @@ def load_tasks() -> List[Task]:
             done=bool(item.get("done", False)),
             created_at=str(item.get("created_at", "")),
             priority=int(item.get("priority", 2)),
+            estimated_minutes=int(item.get("estimated_minutes", 30)),
             )
         )
     return tasks
@@ -105,6 +108,15 @@ def add_task():
     if priority not in (1, 2, 3):
         priority = 2
 
+    estimated_raw = request.form.get("estimated_minutes", "30")
+    try:
+        estimated_minutes = int(estimated_raw)
+    except ValueError:
+        estimated_minutes = 30
+
+    if estimated_minutes not in (15, 30, 60, 120):
+        estimated_minutes = 30
+
     tasks = load_tasks()
     new_task = Task(
         id=str(uuid.uuid4()),
@@ -112,6 +124,7 @@ def add_task():
         done=False,
         created_at=datetime.utcnow().isoformat(timespec="seconds") + "Z",
         priority=priority,
+        estimated_minutes=estimated_minutes,
     )
     tasks.append(new_task)
     save_tasks(tasks)

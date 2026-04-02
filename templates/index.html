@@ -83,7 +83,7 @@
             {% for t in tasks %}
               <div class="list-group-item d-flex align-items-center justify-content-between">
                 <div class="d-flex flex-column">
-                  <div class="d-flex align-items-center gap-2 {{ 'task-done' if t.done else '' }}">
+                 <div class="d-flex align-items-center gap-2 {{ 'task-done' if t.done else '' }}">
                     <span class="badge 
                       {% if t.priority == 3 %}bg-danger
                       {% elif t.priority == 2 %}bg-warning
@@ -92,7 +92,10 @@
                     ">
                       P{{ t.priority }}
                     </span>
+
                     <span>{{ t.title }}</span>
+
+                    <span class="badge bg-info text-dark">{{ t.estimated_minutes }} min</span>
                   </div>
                   <div class="text-muted small small-mono">ID: {{ t.id }} • {{ t.created_at }}</div>
                 </div>
