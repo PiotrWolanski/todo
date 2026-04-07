@@ -24,6 +24,8 @@ class Task:
     created_at: str  # ISO datetime string
     priority: int
     estimated_minutes: int
+    started_at: str
+    remaining_minutes: int = 0
 
 
 def ensure_storage() -> None:
@@ -50,6 +52,7 @@ def load_tasks() -> List[Task]:
             created_at=str(item.get("created_at", "")),
             priority=int(item.get("priority", 2)),
             estimated_minutes=int(item.get("estimated_minutes", 30)),
+            started_at=str(item.get("started_at", item.get("created_at", ""))),
             )
         )
     return tasks
@@ -71,6 +74,17 @@ def find_task(tasks: List[Task], task_id: str) -> Optional[Task]:
 @app.get("/")
 def index():
     tasks = load_tasks()
+
+    
+    now = datetime.utcnow()
+
+    for t in tasks:
+        try:
+            start = datetime.fromisoformat(t.started_at.replace("Z", ""))
+            elapsed = (now - start).total_seconds() / 60
+            t.remaining_minutes = max(0, int(t.estimated_minutes - elapsed))
+        except Exception:
+            t.remaining_minutes = t.estimated_minutes
 
     view = request.args.get("view", "all")  # all | active | done
     if view == "active":
@@ -125,6 +139,7 @@ def add_task():
         created_at=datetime.utcnow().isoformat(timespec="seconds") + "Z",
         priority=priority,
         estimated_minutes=estimated_minutes,
+        started_at=datetime.utcnow().isoformat(timespec="seconds") + "Z",
     )
     tasks.append(new_task)
     save_tasks(tasks)
